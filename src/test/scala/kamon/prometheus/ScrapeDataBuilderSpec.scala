@@ -184,6 +184,14 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_bucket{le="60.0"} 6.0
           |histogram_three_bucket{le="70.0"} 6.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_percentile{quantile="10.0"} 0.0
+          |histogram_three_percentile{quantile="25.0"} 5.0
+          |histogram_three_percentile{quantile="50.0"} 7.0
+          |histogram_three_percentile{quantile="75.0"} 8.0
+          |histogram_three_percentile{quantile="90.0"} 9.0
+          |histogram_three_percentile{quantile="95.0"} 9.0
+          |histogram_three_percentile{quantile="99.0"} 9.0
+          |histogram_three_percentile{quantile="100"} 10.0
           |histogram_three_count 6.0
           |histogram_three_sum 45.0
         """.stripMargin.trim()
@@ -194,6 +202,14 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |# TYPE histogram_three histogram
           |histogram_three_bucket{le="7.0"} 3.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_percentile{quantile="10.0"} 0.0
+          |histogram_three_percentile{quantile="25.0"} 5.0
+          |histogram_three_percentile{quantile="50.0"} 7.0
+          |histogram_three_percentile{quantile="75.0"} 8.0
+          |histogram_three_percentile{quantile="90.0"} 9.0
+          |histogram_three_percentile{quantile="95.0"} 9.0
+          |histogram_three_percentile{quantile="99.0"} 9.0
+          |histogram_three_percentile{quantile="100"} 10.0
           |histogram_three_count 6.0
           |histogram_three_sum 45.0
         """.stripMargin.trim()
@@ -212,6 +228,14 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_with_zero_bucket{le="2.3"} 3.0
           |histogram_with_zero_bucket{le="10.0"} 11.0
           |histogram_with_zero_bucket{le="+Inf"} 11.0
+          |histogram_with_zero_percentile{quantile="10.0"} 0.0
+          |histogram_with_zero_percentile{quantile="25.0"} 1.0
+          |histogram_with_zero_percentile{quantile="50.0"} 4.0
+          |histogram_with_zero_percentile{quantile="75.0"} 7.0
+          |histogram_with_zero_percentile{quantile="90.0"} 8.0
+          |histogram_with_zero_percentile{quantile="95.0"} 9.0
+          |histogram_with_zero_percentile{quantile="99.0"} 9.0
+          |histogram_with_zero_percentile{quantile="100"} 10.0
           |histogram_with_zero_count 11.0
           |histogram_with_zero_sum 55.0
         """.stripMargin.trim()

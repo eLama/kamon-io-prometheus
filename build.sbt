@@ -1,3 +1,4 @@
+
 /* =========================================================================================
  * Copyright © 2013-2017 the kamon project <http://kamon.io/>
  *
@@ -12,14 +13,29 @@
  * and limitations under the License.
  * =========================================================================================
  */
+import com.elama.sbthouserules.Resolvers
 
-resolvers += Resolver.bintrayRepo("kamon-io", "snapshots")
 val kamonCore = "io.kamon" %% "kamon-core" % "1.1.0"
 val nanohttpd = "org.nanohttpd" % "nanohttpd" % "2.3.1"
 
 lazy val root = (project in file("."))
-  .settings(name := "kamon-prometheus")
+  .settings(name := "kamon-prometheus", organization := "com.elama")
   .settings(
     libraryDependencies ++=
       compileScope(kamonCore, nanohttpd) ++
-      testScope(scalatest, logbackClassic))
+      testScope(scalatest, logbackClassic)
+  )
+  .settings(
+      publishMavenStyle := true,
+      publishTo := {
+          val resolver = if (isSnapshot.value) {
+              Resolvers.ElamaSnapshot
+          } else {
+              Resolvers.ElamaRelease
+          }
+          Some(resolver)
+      },
+      releaseTagName := {
+          s"${name.value}-release-${version.value}"
+      }
+  )
