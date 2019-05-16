@@ -35,6 +35,9 @@ class PrometheusReporter extends MetricReporter {
   private val snapshotAccumulator =
     new PeriodSnapshotAccumulator(Duration.ofDays(365 * 5), Duration.ZERO)
 
+  private val percentilesAccumulator =
+    new PeriodSnapshotAccumulator(Duration.ofSeconds(15), Duration.ZERO)
+
   @volatile private var preparedScrapeData: String =
     "# The kamon-prometheus module didn't receive any data just yet.\n"
 
@@ -60,7 +63,10 @@ class PrometheusReporter extends MetricReporter {
 
   override def reportPeriodSnapshot(snapshot: PeriodSnapshot): Unit = {
     snapshotAccumulator.add(snapshot)
+    percentilesAccumulator.add(snapshot)
     val currentData = snapshotAccumulator.peek()
+    val percentileData = percentilesAccumulator.peek()
+
     val reporterConfiguration = readConfiguration(Kamon.config())
     val scrapeDataBuilder = new ScrapeDataBuilder(
       reporterConfiguration,
@@ -70,6 +76,7 @@ class PrometheusReporter extends MetricReporter {
     scrapeDataBuilder.appendGauges(currentData.metrics.gauges)
     scrapeDataBuilder.appendHistograms(currentData.metrics.histograms)
     scrapeDataBuilder.appendHistograms(currentData.metrics.rangeSamplers)
+    scrapeDataBuilder.appendPercentiles(percentileData.metrics.histograms)
     preparedScrapeData = scrapeDataBuilder.build()
   }
 

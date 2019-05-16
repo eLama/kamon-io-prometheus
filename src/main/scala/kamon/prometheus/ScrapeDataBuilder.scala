@@ -58,6 +58,12 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration,
     this
   }
 
+  def appendPercentiles(
+      histograms: Seq[MetricDistribution]): ScrapeDataBuilder = {
+    histograms.groupBy(_.name).foreach(appendPercentilesMetric)
+    this
+  }
+
   private def appendValueMetric(metricType: String, alwaysIncreasing: Boolean)(
       group: (String, Seq[MetricValue])): Unit = {
     val (metricName, snapshots) = group
@@ -78,6 +84,27 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration,
       append(" ")
       append(format(scale(metric.value, metric.unit)))
       append("\n")
+    })
+  }
+
+  private def appendPercentilesMetric(
+      group: (String, Seq[MetricDistribution])): Unit = {
+    val (metricName, snapshots) = group
+    val unit = snapshots.headOption.map(_.unit).getOrElse(none)
+    val normalizedMetricName = normalizeMetricName(metricName, unit)
+
+    append("# TYPE ")
+      .append(normalizedMetricName)
+      .append(" histogram")
+      .append("\n")
+
+    snapshots.foreach(metric => {
+      if (metric.distribution.count > 0) {
+        appendPercentiles(normalizedMetricName,
+                          metric.tags,
+                          metric,
+                          prometheusConfig.percentiles)
+      }
     })
   }
 
