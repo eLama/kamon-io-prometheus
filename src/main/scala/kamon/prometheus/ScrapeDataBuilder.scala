@@ -78,6 +78,7 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration, envi
     snapshots.foreach(metric => {
       if(metric.distribution.count > 0) {
         appendHistogramBuckets(normalizedMetricName, metric.tags, metric, resolveBucketConfiguration(metric))
+        appendPercentiles(normalizedMetricName, metric.tags, metric, prometheusConfig.percentiles)
 
         val count = format(metric.distribution.count)
         val sum = format(scale(metric.distribution.sum, metric.unit))
@@ -105,6 +106,42 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration, envi
         case _            => prometheusConfig.defaultBuckets
       }
     )
+
+  private def appendPercentiles(name: String, tags: Map[String, String], metric: MetricDistribution, percentiles: Seq[java.lang.Double]): Unit = {
+    val distributionPercentiles = metric.distribution.percentilesIterator
+    var currentDistributionPercentile = distributionPercentiles.next()
+    var currentDistributionPercentileValue = currentDistributionPercentile.quantile
+    var inBucketValue = 0d
+    var leftOver = scale(currentDistributionPercentile.value, metric.unit)
+
+    percentiles.foreach { configuredBucket =>
+      val bucketTags = tags + ("quantile" -> String.valueOf(configuredBucket))
+
+      if(currentDistributionPercentileValue <= configuredBucket) {
+        inBucketValue = Math.max(inBucketValue, leftOver)
+        leftOver = 0
+
+        while (distributionPercentiles.hasNext && currentDistributionPercentileValue <= configuredBucket ) {
+          currentDistributionPercentile = distributionPercentiles.next()
+          currentDistributionPercentileValue = currentDistributionPercentile.quantile
+
+          if (currentDistributionPercentileValue <= configuredBucket) {
+            inBucketValue = Math.max(inBucketValue, currentDistributionPercentile.value)
+          }
+          else
+            leftOver = scale(currentDistributionPercentile.value, metric.unit)
+        }
+      }
+
+      appendTimeSerieValue(name, bucketTags, format(inBucketValue), "_percentile")
+    }
+
+    while(distributionPercentiles.hasNext) {
+      leftOver += distributionPercentiles.next().countUnderQuantile
+    }
+
+    appendTimeSerieValue(name, tags + ("quantile" -> "100"), format(Math.max(inBucketValue, leftOver)), "_percentile")
+  }
 
   private def appendHistogramBuckets(name: String, tags: Map[String, String], metric: MetricDistribution, buckets: Seq[java.lang.Double]): Unit = {
     val distributionBuckets = metric.distribution.bucketsIterator

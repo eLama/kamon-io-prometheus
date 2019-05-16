@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 class PrometheusReporter extends MetricReporter {
+
   import PrometheusReporter.Configuration.{readConfiguration, environmentTags}
 
   private val logger = LoggerFactory.getLogger(classOf[PrometheusReporter])
@@ -40,7 +41,7 @@ class PrometheusReporter extends MetricReporter {
   override def start(): Unit = {
     val config = readConfiguration(Kamon.config())
 
-    if(config.startEmbeddedServer)
+    if (config.startEmbeddedServer)
       startEmbeddedServer(config)
   }
 
@@ -52,7 +53,7 @@ class PrometheusReporter extends MetricReporter {
     val config = readConfiguration(newConfig)
 
     stopEmbeddedServer()
-    if(config.startEmbeddedServer) {
+    if (config.startEmbeddedServer) {
       startEmbeddedServer(config)
     }
   }
@@ -93,9 +94,11 @@ class PrometheusReporter extends MetricReporter {
 }
 
 object PrometheusReporter {
+
   case class Configuration(startEmbeddedServer: Boolean, embeddedServerHostname: String, embeddedServerPort: Int,
-    defaultBuckets: Seq[java.lang.Double], timeBuckets: Seq[java.lang.Double], informationBuckets: Seq[java.lang.Double],
-    customBuckets: Map[String, Seq[java.lang.Double]], includeEnvironmentTags: Boolean)
+                           defaultBuckets: Seq[java.lang.Double], timeBuckets: Seq[java.lang.Double], informationBuckets: Seq[java.lang.Double],
+                           customBuckets: Map[String, Seq[java.lang.Double]], includeEnvironmentTags: Boolean,
+                           percentiles: Seq[java.lang.Double])
 
   object Configuration {
 
@@ -110,7 +113,8 @@ object PrometheusReporter {
         timeBuckets = prometheusConfig.getDoubleList("buckets.time-buckets").asScala,
         informationBuckets = prometheusConfig.getDoubleList("buckets.information-buckets").asScala,
         customBuckets = readCustomBuckets(prometheusConfig.getConfig("buckets.custom")),
-        includeEnvironmentTags = prometheusConfig.getBoolean("include-environment-tags")
+        includeEnvironmentTags = prometheusConfig.getBoolean("include-environment-tags"),
+        percentiles = prometheusConfig.getDoubleList("buckets.percentiles").asScala
       )
     }
 
@@ -123,4 +127,5 @@ object PrometheusReporter {
         .map(k => (k, customBuckets.getDoubleList(ConfigUtil.quoteString(k)).asScala))
         .toMap
   }
+
 }
