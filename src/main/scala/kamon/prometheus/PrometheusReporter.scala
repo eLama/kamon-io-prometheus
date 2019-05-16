@@ -32,11 +32,11 @@ class PrometheusReporter extends MetricReporter {
 
   private val logger = LoggerFactory.getLogger(classOf[PrometheusReporter])
   private var embeddedHttpServer: Option[EmbeddedHttpServer] = None
-  private val snapshotAccumulator = new PeriodSnapshotAccumulator(Duration.ofDays(365 * 5), Duration.ZERO)
+  private val snapshotAccumulator =
+    new PeriodSnapshotAccumulator(Duration.ofDays(365 * 5), Duration.ZERO)
 
   @volatile private var preparedScrapeData: String =
     "# The kamon-prometheus module didn't receive any data just yet.\n"
-
 
   override def start(): Unit = {
     val config = readConfiguration(Kamon.config())
@@ -62,7 +62,9 @@ class PrometheusReporter extends MetricReporter {
     snapshotAccumulator.add(snapshot)
     val currentData = snapshotAccumulator.peek()
     val reporterConfiguration = readConfiguration(Kamon.config())
-    val scrapeDataBuilder = new ScrapeDataBuilder(reporterConfiguration, environmentTags(reporterConfiguration))
+    val scrapeDataBuilder = new ScrapeDataBuilder(
+      reporterConfiguration,
+      environmentTags(reporterConfiguration))
 
     scrapeDataBuilder.appendCounters(currentData.metrics.counters)
     scrapeDataBuilder.appendGauges(currentData.metrics.gauges)
@@ -74,18 +76,23 @@ class PrometheusReporter extends MetricReporter {
   def scrapeData(): String =
     preparedScrapeData
 
-  class EmbeddedHttpServer(hostname: String, port: Int) extends NanoHTTPD(hostname, port) {
+  class EmbeddedHttpServer(hostname: String, port: Int)
+      extends NanoHTTPD(hostname, port) {
     override def serve(session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response = {
-      newFixedLengthResponse(Response.Status.OK, "text/plain; version=0.0.4; charset=utf-8", scrapeData())
+      newFixedLengthResponse(Response.Status.OK,
+                             "text/plain; version=0.0.4; charset=utf-8",
+                             scrapeData())
     }
   }
 
-
-  private def startEmbeddedServer(config: PrometheusReporter.Configuration): Unit = {
-    val server = new EmbeddedHttpServer(config.embeddedServerHostname, config.embeddedServerPort)
+  private def startEmbeddedServer(
+      config: PrometheusReporter.Configuration): Unit = {
+    val server = new EmbeddedHttpServer(config.embeddedServerHostname,
+                                        config.embeddedServerPort)
     server.start()
 
-    logger.info(s"Started the embedded HTTP server on http://${config.embeddedServerHostname}:${config.embeddedServerPort}")
+    logger.info(
+      s"Started the embedded HTTP server on http://${config.embeddedServerHostname}:${config.embeddedServerPort}")
     embeddedHttpServer = Some(server)
   }
 
@@ -95,9 +102,14 @@ class PrometheusReporter extends MetricReporter {
 
 object PrometheusReporter {
 
-  case class Configuration(startEmbeddedServer: Boolean, embeddedServerHostname: String, embeddedServerPort: Int,
-                           defaultBuckets: Seq[java.lang.Double], timeBuckets: Seq[java.lang.Double], informationBuckets: Seq[java.lang.Double],
-                           customBuckets: Map[String, Seq[java.lang.Double]], includeEnvironmentTags: Boolean,
+  case class Configuration(startEmbeddedServer: Boolean,
+                           embeddedServerHostname: String,
+                           embeddedServerPort: Int,
+                           defaultBuckets: Seq[java.lang.Double],
+                           timeBuckets: Seq[java.lang.Double],
+                           informationBuckets: Seq[java.lang.Double],
+                           customBuckets: Map[String, Seq[java.lang.Double]],
+                           includeEnvironmentTags: Boolean,
                            percentiles: Seq[java.lang.Double])
 
   object Configuration {
@@ -106,25 +118,36 @@ object PrometheusReporter {
       val prometheusConfig = config.getConfig("kamon.prometheus")
 
       PrometheusReporter.Configuration(
-        startEmbeddedServer = prometheusConfig.getBoolean("start-embedded-http-server"),
-        embeddedServerHostname = prometheusConfig.getString("embedded-server.hostname"),
+        startEmbeddedServer =
+          prometheusConfig.getBoolean("start-embedded-http-server"),
+        embeddedServerHostname =
+          prometheusConfig.getString("embedded-server.hostname"),
         embeddedServerPort = prometheusConfig.getInt("embedded-server.port"),
-        defaultBuckets = prometheusConfig.getDoubleList("buckets.default-buckets").asScala,
-        timeBuckets = prometheusConfig.getDoubleList("buckets.time-buckets").asScala,
-        informationBuckets = prometheusConfig.getDoubleList("buckets.information-buckets").asScala,
-        customBuckets = readCustomBuckets(prometheusConfig.getConfig("buckets.custom")),
-        includeEnvironmentTags = prometheusConfig.getBoolean("include-environment-tags"),
-        percentiles = prometheusConfig.getDoubleList("buckets.percentiles").asScala
+        defaultBuckets =
+          prometheusConfig.getDoubleList("buckets.default-buckets").asScala,
+        timeBuckets =
+          prometheusConfig.getDoubleList("buckets.time-buckets").asScala,
+        informationBuckets =
+          prometheusConfig.getDoubleList("buckets.information-buckets").asScala,
+        customBuckets =
+          readCustomBuckets(prometheusConfig.getConfig("buckets.custom")),
+        includeEnvironmentTags =
+          prometheusConfig.getBoolean("include-environment-tags"),
+        percentiles =
+          prometheusConfig.getDoubleList("buckets.percentiles").asScala
       )
     }
 
-    def environmentTags(reporterConfiguration: PrometheusReporter.Configuration) =
-      if (reporterConfiguration.includeEnvironmentTags) Kamon.environment.tags else Map.empty[String, String]
+    def environmentTags(
+        reporterConfiguration: PrometheusReporter.Configuration) =
+      if (reporterConfiguration.includeEnvironmentTags) Kamon.environment.tags
+      else Map.empty[String, String]
 
-    private def readCustomBuckets(customBuckets: Config): Map[String, Seq[java.lang.Double]] =
-      customBuckets
-        .topLevelKeys
-        .map(k => (k, customBuckets.getDoubleList(ConfigUtil.quoteString(k)).asScala))
+    private def readCustomBuckets(
+        customBuckets: Config): Map[String, Seq[java.lang.Double]] =
+      customBuckets.topLevelKeys
+        .map(k =>
+          (k, customBuckets.getDoubleList(ConfigUtil.quoteString(k)).asScala))
         .toMap
   }
 
