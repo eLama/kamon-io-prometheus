@@ -148,16 +148,16 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration,
     percentiles.foreach { configuredBucket =>
       val bucketTags = tags + ("quantile" -> String.valueOf(configuredBucket))
 
-      if (currentDistributionPercentileValue <= configuredBucket) {
+      if (currentDistributionPercentileValue <= configuredBucket * 100) {
         inBucketValue = Math.max(inBucketValue, leftOver)
         leftOver = 0
 
-        while (distributionPercentiles.hasNext && currentDistributionPercentileValue <= configuredBucket) {
+        while (distributionPercentiles.hasNext && currentDistributionPercentileValue <= configuredBucket * 100) {
           currentDistributionPercentile = distributionPercentiles.next()
           currentDistributionPercentileValue =
             currentDistributionPercentile.quantile
 
-          if (currentDistributionPercentileValue <= configuredBucket) {
+          if (currentDistributionPercentileValue <= configuredBucket * 100) {
             inBucketValue =
               Math.max(inBucketValue, currentDistributionPercentile.value)
           } else
@@ -176,7 +176,7 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration,
     }
 
     appendTimeSerieValue(name,
-                         tags + ("quantile" -> "100"),
+                         tags + ("quantile" -> "1"),
                          format(Math.max(inBucketValue, leftOver)),
                          "_percentile")
   }
