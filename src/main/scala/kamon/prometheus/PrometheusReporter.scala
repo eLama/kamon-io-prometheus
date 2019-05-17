@@ -36,7 +36,7 @@ class PrometheusReporter extends MetricReporter {
     new PeriodSnapshotAccumulator(Duration.ofDays(365 * 5), Duration.ZERO)
 
   private val percentilesAccumulator =
-    new PeriodSnapshotAccumulator(Duration.ofSeconds(15), Duration.ZERO)
+    new PeriodSnapshotAccumulator(Duration.ofMillis(15500), Duration.ZERO)
 
   @volatile private var preparedScrapeData: String =
     "# The kamon-prometheus module didn't receive any data just yet.\n"
