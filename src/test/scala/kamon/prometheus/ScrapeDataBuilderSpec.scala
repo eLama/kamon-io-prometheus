@@ -138,6 +138,7 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
       builder(
         customBuckets = Map("histogram.custom-buckets" -> Seq(1D, 2D, 4D)))
         .appendHistograms(Seq(customBucketsHistogram))
+        .appendPercentiles(Seq(customBucketsHistogram))
         .build() should include {
         """
           |# TYPE histogram_custom_buckets histogram
@@ -145,6 +146,9 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_custom_buckets_bucket{le="2.0"} 2.0
           |histogram_custom_buckets_bucket{le="4.0"} 4.0
           |histogram_custom_buckets_bucket{le="+Inf"} 10.0
+          |histogram_custom_buckets_count 10.0
+          |histogram_custom_buckets_sum 55.0
+          |# TYPE histogram_custom_buckets histogram
           |histogram_custom_buckets_percentile{quantile="0.1"} 1.0
           |histogram_custom_buckets_percentile{quantile="0.25"} 2.0
           |histogram_custom_buckets_percentile{quantile="0.5"} 5.0
@@ -154,8 +158,6 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_custom_buckets_percentile{quantile="0.99"} 9.0
           |histogram_custom_buckets_percentile{quantile="0.999"} 9.0
           |histogram_custom_buckets_percentile{quantile="1"} 10.0
-          |histogram_custom_buckets_count 10.0
-          |histogram_custom_buckets_sum 55.0
         """.stripMargin.trim()
       }
     }
@@ -172,11 +174,15 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
 
       builder(buckets = Seq(15D))
         .appendHistograms(Seq(histogramOne))
+        .appendPercentiles(Seq(histogramOne))
         .build() should include {
         """
           |# TYPE histogram_one histogram
           |histogram_one_bucket{le="15.0"} 10.0
           |histogram_one_bucket{le="+Inf"} 10.0
+          |histogram_one_count 10.0
+          |histogram_one_sum 55.0
+          |# TYPE histogram_one histogram
           |histogram_one_percentile{quantile="0.1"} 1.0
           |histogram_one_percentile{quantile="0.25"} 2.0
           |histogram_one_percentile{quantile="0.5"} 5.0
@@ -186,13 +192,12 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_one_percentile{quantile="0.99"} 9.0
           |histogram_one_percentile{quantile="0.999"} 9.0
           |histogram_one_percentile{quantile="1"} 10.0
-          |histogram_one_count 10.0
-          |histogram_one_sum 55.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(5D, 10D, 15D, 20D))
         .appendHistograms(Seq(histogramTwo))
+        .appendPercentiles(Seq(histogramTwo))
         .build() should include {
         """
           |# TYPE histogram_two histogram
@@ -201,6 +206,9 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_two_bucket{le="15.0"} 15.0
           |histogram_two_bucket{le="20.0"} 20.0
           |histogram_two_bucket{le="+Inf"} 20.0
+          |histogram_two_count 20.0
+          |histogram_two_sum 210.0
+          |# TYPE histogram_two histogram
           |histogram_two_percentile{quantile="0.1"} 2.0
           |histogram_two_percentile{quantile="0.25"} 5.0
           |histogram_two_percentile{quantile="0.5"} 10.0
@@ -210,18 +218,20 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_two_percentile{quantile="0.99"} 19.0
           |histogram_two_percentile{quantile="0.999"} 19.0
           |histogram_two_percentile{quantile="1"} 20.0
-          |histogram_two_count 20.0
-          |histogram_two_sum 210.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(3D))
         .appendHistograms(Seq(histogramThree))
+        .appendPercentiles(Seq(histogramThree))
         .build() should include {
         """
           |# TYPE histogram_three histogram
           |histogram_three_bucket{le="3.0"} 0.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_count 6.0
+          |histogram_three_sum 45.0
+          |# TYPE histogram_three histogram
           |histogram_three_percentile{quantile="0.1"} 0.0
           |histogram_three_percentile{quantile="0.25"} 5.0
           |histogram_three_percentile{quantile="0.5"} 7.0
@@ -231,19 +241,21 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_percentile{quantile="0.99"} 9.0
           |histogram_three_percentile{quantile="0.999"} 9.0
           |histogram_three_percentile{quantile="1"} 10.0
-          |histogram_three_count 6.0
-          |histogram_three_sum 45.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(3D, 50D))
         .appendHistograms(Seq(histogramThree))
+        .appendPercentiles(Seq(histogramThree))
         .build() should include {
         """
           |# TYPE histogram_three histogram
           |histogram_three_bucket{le="3.0"} 0.0
           |histogram_three_bucket{le="50.0"} 6.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_count 6.0
+          |histogram_three_sum 45.0
+          |# TYPE histogram_three histogram
           |histogram_three_percentile{quantile="0.1"} 0.0
           |histogram_three_percentile{quantile="0.25"} 5.0
           |histogram_three_percentile{quantile="0.5"} 7.0
@@ -253,13 +265,12 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_percentile{quantile="0.99"} 9.0
           |histogram_three_percentile{quantile="0.999"} 9.0
           |histogram_three_percentile{quantile="1"} 10.0
-          |histogram_three_count 6.0
-          |histogram_three_sum 45.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(3D, 50D, 60D, 70D))
         .appendHistograms(Seq(histogramThree))
+        .appendPercentiles(Seq(histogramThree))
         .build() should include {
         """
           |# TYPE histogram_three histogram
@@ -268,6 +279,9 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_bucket{le="60.0"} 6.0
           |histogram_three_bucket{le="70.0"} 6.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_count 6.0
+          |histogram_three_sum 45.0
+          |# TYPE histogram_three histogram
           |histogram_three_percentile{quantile="0.1"} 0.0
           |histogram_three_percentile{quantile="0.25"} 5.0
           |histogram_three_percentile{quantile="0.5"} 7.0
@@ -277,18 +291,20 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_percentile{quantile="0.99"} 9.0
           |histogram_three_percentile{quantile="0.999"} 9.0
           |histogram_three_percentile{quantile="1"} 10.0
-          |histogram_three_count 6.0
-          |histogram_three_sum 45.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(7D))
         .appendHistograms(Seq(histogramThree))
+        .appendPercentiles(Seq(histogramThree))
         .build() should include {
         """
           |# TYPE histogram_three histogram
           |histogram_three_bucket{le="7.0"} 3.0
           |histogram_three_bucket{le="+Inf"} 6.0
+          |histogram_three_count 6.0
+          |histogram_three_sum 45.0
+          |# TYPE histogram_three histogram
           |histogram_three_percentile{quantile="0.1"} 0.0
           |histogram_three_percentile{quantile="0.25"} 5.0
           |histogram_three_percentile{quantile="0.5"} 7.0
@@ -298,13 +314,12 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_three_percentile{quantile="0.99"} 9.0
           |histogram_three_percentile{quantile="0.999"} 9.0
           |histogram_three_percentile{quantile="1"} 10.0
-          |histogram_three_count 6.0
-          |histogram_three_sum 45.0
         """.stripMargin.trim()
       }
 
       builder(buckets = Seq(0.005D, 0.05D, 0.5D, 1D, 2D, 2.1D, 2.2D, 2.3D, 10D))
         .appendHistograms(Seq(histogramWithZero))
+        .appendPercentiles(Seq(histogramWithZero))
         .build() should include {
         """
           |# TYPE histogram_with_zero histogram
@@ -318,6 +333,9 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_with_zero_bucket{le="2.3"} 3.0
           |histogram_with_zero_bucket{le="10.0"} 11.0
           |histogram_with_zero_bucket{le="+Inf"} 11.0
+          |histogram_with_zero_count 11.0
+          |histogram_with_zero_sum 55.0
+          |# TYPE histogram_with_zero histogram
           |histogram_with_zero_percentile{quantile="0.1"} 0.0
           |histogram_with_zero_percentile{quantile="0.25"} 1.0
           |histogram_with_zero_percentile{quantile="0.5"} 4.0
@@ -327,8 +345,6 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
           |histogram_with_zero_percentile{quantile="0.99"} 9.0
           |histogram_with_zero_percentile{quantile="0.999"} 9.0
           |histogram_with_zero_percentile{quantile="1"} 10.0
-          |histogram_with_zero_count 11.0
-          |histogram_with_zero_sum 55.0
         """.stripMargin.trim()
       }
     }

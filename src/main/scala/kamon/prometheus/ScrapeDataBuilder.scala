@@ -125,10 +125,6 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Configuration,
                                metric.tags,
                                metric,
                                resolveBucketConfiguration(metric))
-        appendPercentiles(normalizedMetricName,
-                          metric.tags,
-                          metric,
-                          prometheusConfig.percentiles)
 
         val count = format(metric.distribution.count)
         val sum = format(scale(metric.distribution.sum, metric.unit))
