@@ -64,7 +64,9 @@ class PrometheusReporter extends MetricReporter {
   override def reportPeriodSnapshot(snapshot: PeriodSnapshot): Unit = {
     snapshotAccumulator.add(snapshot)
     val currentData = snapshotAccumulator.peek()
-    val percentileData = percentilesAccumulator.add(snapshot).getOrElse(percentilesAccumulator.peek())
+    val percentileData = percentilesAccumulator
+      .add(snapshot)
+      .getOrElse(percentilesAccumulator.peek())
 
     val reporterConfiguration = readConfiguration(Kamon.config())
     val scrapeDataBuilder = new ScrapeDataBuilder(
