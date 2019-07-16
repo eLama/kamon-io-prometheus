@@ -162,6 +162,31 @@ class ScrapeDataBuilderSpec extends WordSpec with Matchers {
       }
     }
 
+    "scale in percentiles" in {
+      val histogramOne =
+        constantDistribution("histogram-one",
+                             Map.empty,
+                             time.milliseconds,
+                             1,
+                             10)
+
+      builder(buckets = Nil)
+        .appendPercentiles(Seq(histogramOne))
+        .build() should include {
+        """
+          |histogram_one_seconds_percentile{quantile="0.1"} 0.001
+          |histogram_one_seconds_percentile{quantile="0.25"} 0.002
+          |histogram_one_seconds_percentile{quantile="0.5"} 0.005
+          |histogram_one_seconds_percentile{quantile="0.75"} 0.007
+          |histogram_one_seconds_percentile{quantile="0.9"} 0.009
+          |histogram_one_seconds_percentile{quantile="0.95"} 0.009
+          |histogram_one_seconds_percentile{quantile="0.99"} 0.009
+          |histogram_one_seconds_percentile{quantile="0.999"} 0.009
+          |histogram_one_seconds_percentile{quantile="1"} 0.01
+        """.stripMargin.trim()
+      }
+    }
+
     "append histograms grouped together by metric name and with all their derived time series " in {
       val histogramOne =
         constantDistribution("histogram-one", Map.empty, none, 1, 10)
