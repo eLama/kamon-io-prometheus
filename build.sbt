@@ -16,7 +16,6 @@
 import com.elama.sbthouserules.Resolvers
 
 val scala212 = "2.12.10"
-val scala213 = "2.13.1"
 
 ThisBuild / scalaVersion := scala212
 
@@ -25,8 +24,6 @@ resolvers += Resolver.bintrayRepo("kamon-io", "snapshots")
 val kamonCore    = "io.kamon" %% "kamon-core"     % "2.0.0"
 val kamonTestKit = "io.kamon" %% "kamon-testkit"  % "2.0.0"
 val nanohttpd    = "org.nanohttpd" % "nanohttpd"  % "2.3.1"
-
-lazy val supportedScalaVersions = List(scala212, scala213)
 
 lazy val root = (project in file("."))
   .settings(name := "kamon-prometheus", organization := "com.elama")
@@ -48,5 +45,5 @@ lazy val root = (project in file("."))
     releaseTagName := {
       s"${name.value}-release-${version.value}"
     },
-    crossScalaVersions := List(scala212, scala213)
+    crossScalaVersions := List(scala212)
   )
