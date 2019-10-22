@@ -15,27 +15,28 @@
  */
 import com.elama.sbthouserules.Resolvers
 
-val kamonCore = "io.kamon" %% "kamon-core" % "1.1.0"
-val nanohttpd = "org.nanohttpd" % "nanohttpd" % "2.3.1"
+val kamonCore    = "io.kamon" %% "kamon-core"     % "2.0.0"
+val kamonTestKit = "io.kamon" %% "kamon-testkit"  % "2.0.0"
+val nanohttpd    = "org.nanohttpd" % "nanohttpd"  % "2.3.1"
 
 lazy val root = (project in file("."))
   .settings(name := "kamon-prometheus", organization := "com.elama")
   .settings(
     libraryDependencies ++=
       compileScope(kamonCore, nanohttpd) ++
-      testScope(scalatest, logbackClassic)
+        testScope(scalatest, logbackClassic)
   )
   .settings(
-      publishMavenStyle := true,
-      publishTo := {
-          val resolver = if (isSnapshot.value) {
-              Resolvers.ElamaSnapshot
-          } else {
-              Resolvers.ElamaRelease
-          }
-          Some(resolver)
-      },
-      releaseTagName := {
-          s"${name.value}-release-${version.value}"
+    publishMavenStyle := true,
+    publishTo := {
+      val resolver = if (isSnapshot.value) {
+        Resolvers.ElamaSnapshot
+      } else {
+        Resolvers.ElamaRelease
       }
+      Some(resolver)
+    },
+    releaseTagName := {
+      s"${name.value}-release-${version.value}"
+    }
   )
