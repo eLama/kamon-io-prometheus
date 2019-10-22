@@ -15,8 +15,8 @@
  */
 import com.elama.sbthouserules.Resolvers
 
-val kamonCore    = "io.kamon" %% "kamon-core"     % "2.0.0"
-val kamonTestKit = "io.kamon" %% "kamon-testkit"  % "2.0.0"
+val kamonCore    = "io.kamon" %% "kamon-core"     % "2.0.1"
+val kamonTestKit = "io.kamon" %% "kamon-testkit"  % "2.0.1"
 val nanohttpd    = "org.nanohttpd" % "nanohttpd"  % "2.3.1"
 
 lazy val root = (project in file("."))
@@ -24,7 +24,7 @@ lazy val root = (project in file("."))
   .settings(
     libraryDependencies ++=
       compileScope(kamonCore, nanohttpd) ++
-        testScope(scalatest, logbackClassic)
+        testScope(scalatest, logbackClassic, kamonTestKit)
   )
   .settings(
     publishMavenStyle := true,
