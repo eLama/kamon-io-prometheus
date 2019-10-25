@@ -212,7 +212,8 @@ class ScrapeDataBuilder(prometheusConfig: PrometheusReporter.Settings,
 
           if (currentDistributionPercentileValue <= configuredBucket * 100) {
             inBucketValue =
-              Math.max(inBucketValue, currentDistributionPercentile.value)
+              Math.max(inBucketValue,
+                       convert(currentDistributionPercentile.value, unit))
           } else
             leftOver = convert(currentDistributionPercentile.value, unit)
         }
