@@ -35,7 +35,7 @@ class PrometheusReporter(configPath: String) extends MetricReporter {
   private val _logger = LoggerFactory.getLogger(classOf[PrometheusReporter])
   private var _embeddedHttpServer: Option[EmbeddedHttpServer] = None
   private val _snapshotAccumulator =
-    PeriodSnapshot.accumulator(Duration.ofDays(365 * 5), Duration.ZERO)
+    PeriodSnapshot.accumulator(Duration.ofDays(365 * 5), Duration.ZERO, Duration.ofDays(365 * 5))
   private val percentilesAccumulator =
     PeriodSnapshot.accumulator(Duration.ofMillis(15500), Duration.ZERO)
 
