@@ -15,22 +15,19 @@
  */
 import com.elama.sbthouserules.Resolvers
 
-val scala212 = "2.12.10"
-
-ThisBuild / scalaVersion := scala212
-
 resolvers += Resolver.bintrayRepo("kamon-io", "snapshots")
 
 val kamonCore    = "io.kamon" %% "kamon-core"     % "2.0.4"
 val kamonTestKit = "io.kamon" %% "kamon-testkit"  % "2.0.4"
 val nanohttpd    = "org.nanohttpd" % "nanohttpd"  % "2.3.1"
+val scalaTest    = "org.scalatest" %% "scalatest" % "3.1.2"
 
 lazy val root = (project in file("."))
   .settings(name := "kamon-prometheus", organization := "com.elama")
   .settings(
     libraryDependencies ++=
       compileScope(kamonCore, nanohttpd) ++
-        testScope(scalatest, logbackClassic, kamonTestKit)
+        testScope(scalatest, logbackClassic, kamonTestKit, scalaTest)
   )
   .settings(
     publishMavenStyle := true,
@@ -45,5 +42,7 @@ lazy val root = (project in file("."))
     releaseTagName := {
       s"${name.value}-release-${version.value}"
     },
-    crossScalaVersions := List(scala212)
+    scalaVersion := "2.13.2",
+    crossScalaVersions := Seq("2.12.11", "2.13.2"),
+    releaseCrossBuild := true
   )

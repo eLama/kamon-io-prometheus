@@ -160,7 +160,7 @@ object PrometheusReporter {
         includeEnvironmentTags =
           prometheusConfig.getBoolean("include-environment-tags"),
         percentiles =
-          prometheusConfig.getDoubleList("buckets.percentiles").asScala
+          prometheusConfig.getDoubleList("buckets.percentiles").asScala.toSeq
       )
     }
 
