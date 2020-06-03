@@ -83,6 +83,8 @@ class PrometheusReporter(configPath: String) extends MetricReporter {
     scrapeDataBuilder.appendHistograms(currentData.timers)
     scrapeDataBuilder.appendHistograms(currentData.rangeSamplers)
     scrapeDataBuilder.appendPercentiles(percentileData.histograms)
+    scrapeDataBuilder.appendPercentiles(percentileData.timers)
+    scrapeDataBuilder.appendPercentiles(percentileData.rangeSamplers)
     _preparedScrapeData = scrapeDataBuilder.build()
   }
 
